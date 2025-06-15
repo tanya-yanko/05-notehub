@@ -10,7 +10,6 @@ interface NoteFormProps {
   onClose: () => void;
 }
 
-
 const NoteFormSchema = Yup.object().shape({
   title: Yup.string()
     .min(3, "Too short title, min 3 symbols")
@@ -22,10 +21,11 @@ const NoteFormSchema = Yup.object().shape({
 
 export default function NoteForm({ onClose }: NoteFormProps) {
   const queryClient = useQueryClient();
+
   const addNewNote = useMutation({
     mutationFn: (newNoteData: NoteFormData) => createNote(newNoteData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["Notes"] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });  
       onClose();
     },
     onError: () => {
@@ -35,10 +35,15 @@ export default function NoteForm({ onClose }: NoteFormProps) {
       });
     },
   });
-  const handleSubmit = (values: NoteFormData, actions: FormikHelpers<NoteFormData>) => {
+
+  const handleSubmit = (
+    values: NoteFormData,
+    actions: FormikHelpers<NoteFormData>
+  ) => {
     addNewNote.mutate(values);
     actions.resetForm();
   };
+
   return (
     <Formik
       initialValues={{

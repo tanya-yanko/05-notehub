@@ -1,5 +1,5 @@
 import axios from "axios";
-import { type Note } from "../types/note";
+import type { Note } from "../types/note";
 import type { NoteTag } from "../types/note";
 
 export interface NewNoteContent {
@@ -15,13 +15,7 @@ export interface PaginatedNotesResponse {
   totalResults: number;
 }
 
-export interface DeletedNoteInfo {
-  message: string;
-  deletedNoteId: number;
-}
-
 const BASE_URL = "https://notehub-public.goit.study/api";
-
 const TOKEN = import.meta.env.VITE_NOTEHUB_TOKEN;
 
 const axiosConfig = axios.create({
@@ -41,8 +35,8 @@ export const fetchNotes = async (
     const response = await axiosConfig.get<PaginatedNotesResponse>("/notes", {
       params: {
         page,
-        ...(search !== "" && { search: search }),
         perPage,
+        ...(search !== "" && { search }),
       },
     });
 
@@ -57,7 +51,7 @@ export const fetchNotes = async (
     } else {
       console.error("Unexpected error fetching notes:", error);
     }
-    throw error;
+    throw new Error("Failed to fetch notes");
   }
 };
 
@@ -75,14 +69,13 @@ export const createNote = async (content: NewNoteContent): Promise<Note> => {
     } else {
       console.error("Unexpected error creating note:", error);
     }
-    throw error;
+    throw new Error("Failed to create note");
   }
 };
 
-export const removeNote = async (id: number): Promise<DeletedNoteInfo> => {
+export const removeNote = async (id: number): Promise<Note> => {
   try {
-    const response = await axiosConfig.delete<DeletedNoteInfo>(`/notes/${id}`);
-
+    const response = await axiosConfig.delete<Note>(`/notes/${id}`);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -94,6 +87,6 @@ export const removeNote = async (id: number): Promise<DeletedNoteInfo> => {
     } else {
       console.error("Unexpected error deleting note:", error);
     }
-    throw error;
+    throw new Error("Failed to delete note");
   }
 };
